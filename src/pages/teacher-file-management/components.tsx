@@ -1,6 +1,16 @@
 import styled, { keyframes, css } from 'styled-components';
 import colors from '../../assets/colors';
 
+const fadeIn = keyframes`
+    from { opacity: 0; }
+    to { opacity: 1; }
+`;
+
+const fadeOut = keyframes`
+    from { opacity: 1; }
+    to { opacity: 0; }
+`;
+
 export const MainContainer = styled.div`
     height: 100vh;
     width: 100vw;
@@ -8,13 +18,9 @@ export const MainContainer = styled.div`
     align-items: center;
     background: rgb(43,84,52);
     background: radial-gradient(circle, rgba(43,84,52,1) 0%, rgba(15,41,46,1) 92%);
-
-    @media (max-width: 1000px) {
-        padding-bottom: 80px;
-    }
 `;
 
-export const Content = styled.div`
+export const Container = styled.div`
     width: 90%;
     height: 100%;
     margin-left: 100px;
@@ -24,45 +30,26 @@ export const Content = styled.div`
     max-height: 800px;
     overflow-y: auto;
     flex-wrap: wrap;
-
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: white;
-        border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #e0e0e0;
-    }
-
-    scrollbar-color: white transparent;
-    scrollbar-width: thin;
 `;
-
-export const Container = Content;
 
 export const CardsContainer = styled.div`
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 16px;
-    justify-content: center;
+    align-items: center;
     width: 100%;
-    align-items: flex-start;
 `;
 
 export const Card = styled.div`
-    width: 350px;
+    width: 450px;
     background: white;
     border-radius: 8px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 `;
 
 export const CardHeader = styled.div`
@@ -77,27 +64,29 @@ export const CardBody = styled.div`
     padding: 15px;
     color: ${colors.text};
     background: none;
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
 `;
 
-export const SubjectName = styled.p`
-    font-size: 1em;
-    color: ${colors.text};
-    margin: 8px 0;
-    text-align: center;
-`;
+export const DownloadButton = styled.button`
+    align-self: flex-end;
+    margin-top: auto;
+    background-color: ${colors.primary};
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
 
-// Animaciones de entrada y salida
-const fadeIn = keyframes`
-    from { opacity: 0; }
-    to { opacity: 1; }
-`;
-
-const fadeOut = keyframes`
-    from { opacity: 1; }
-    to { opacity: 0; }
+    &:hover {
+        background-color: ${colors.secondary};
+        color: white;
+    }
 `;
 
 export const LoadingOverlay = styled.div<{ isVisible: boolean }>`
@@ -114,8 +103,6 @@ export const LoadingOverlay = styled.div<{ isVisible: boolean }>`
     font-size: 1.5em;
     z-index: 1000;
     pointer-events: none;
-
-    // Aplicación de la transición según el estado de visibilidad
     opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
     animation: ${({ isVisible }) =>
         isVisible
