@@ -12,24 +12,39 @@ const fadeOut = keyframes`
 `;
 
 export const MainContainer = styled.div`
-    height: 100vh;
-    width: 100vw;
+    height: 100vh ;
+    width: 100vw ;
     display: flex;
-    align-items: center;
+    align-items: center ;
     background: rgb(43,84,52);
     background: radial-gradient(circle, rgba(43,84,52,1) 0%, rgba(15,41,46,1) 92%);
-`;
+    overflow: hidden;
+    @media (max-width: 1000px){
+        flex-direction: column;
+        height: 110vh ;
+    }
+`
 
 export const Container = styled.div`
-    width: 90%;
-    height: 100%;
-    margin-left: 100px;
+    flex: 1; // Take up remaining space beside sidebar
     display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    max-height: 800px;
-    overflow-y: auto;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    overflow-y: auto; // Make the content scrollable
+    max-height: 100vh;
+`;
+
+export const Header = styled.h1`
+    position: sticky;
+    top: 0;
+    background: rgba(43,84,52,1);
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+    font-size: 2rem;
+    color: white;
+    z-index: 10;
 `;
 
 export const CardsContainer = styled.div`
@@ -38,6 +53,7 @@ export const CardsContainer = styled.div`
     gap: 16px;
     align-items: center;
     width: 100%;
+    overflow-y: auto; // Allow scrolling on the cards
 `;
 
 export const Card = styled.div`
@@ -46,7 +62,6 @@ export const Card = styled.div`
     border-radius: 8px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -63,29 +78,32 @@ export const CardHeader = styled.div`
 export const CardBody = styled.div`
     padding: 15px;
     color: ${colors.text};
-    background: none;
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
 `;
 
+
 export const DownloadButton = styled.button`
-    align-self: flex-end;
-    margin-top: auto;
     background-color: ${colors.primary};
     color: white;
     padding: 8px 12px;
     border: none;
     border-radius: 4px;
-    text-decoration: none;
     font-size: 0.9em;
     cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
+    margin-top: 10px;
 
     &:hover {
         background-color: ${colors.secondary};
-        color: white;
+    }
+`;
+
+export const DeleteButton = styled(DownloadButton)`
+    background-color: red;
+    
+    &:hover {
+        background-color: darkred;
     }
 `;
 
@@ -108,4 +126,30 @@ export const LoadingOverlay = styled.div<{ isVisible: boolean }>`
         isVisible
             ? css`${fadeIn} 0.5s ease forwards`
             : css`${fadeOut} 0.5s ease forwards`};
+`;
+
+
+export const FixedTitleContainer = styled.div`
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+
+    h1 {
+        font-size: 1.8rem; // Adjust font size as needed
+        margin: 0;
+    }
+`;
+
+export const ScrollableCardsContainer = styled.div`
+    width: 100%;
+    height: calc(100vh - 150px); /* Ajusta el alto para permitir el scroll */
+    overflow-y: auto;
+    padding: 20px;
+`;
+
+export const ButtonContainer = styled.div`
+    display: flex;
+    gap: 10px; // Adjusts spacing between buttons
+    justify-content: center;
+    margin-top: 10px;
 `;
