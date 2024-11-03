@@ -131,11 +131,15 @@ export const LoadingOverlay = styled.div<{ isVisible: boolean }>`
 
 export const FixedTitleContainer = styled.div`
     width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 20px;
     text-align: center;
+    position: relative;
 
     h1 {
-        font-size: 1.8rem; // Adjust font size as needed
+        font-size: 1.8rem;
         margin: 0;
     }
 `;
@@ -152,4 +156,22 @@ export const ButtonContainer = styled.div`
     gap: 10px; // Adjusts spacing between buttons
     justify-content: center;
     margin-top: 10px;
+`;
+
+export const UploadButton = styled.button`
+    background-color: ${colors.primary};
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    position: absolute;
+    right: 20px; /* Adjust to position it on the right */
+    top: 50%;
+    transform: translateY(-50%); /* Center vertically */
+
+    &:hover {
+        background-color: ${colors.secondary};
+    }
 `;
