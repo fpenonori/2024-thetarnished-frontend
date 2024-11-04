@@ -20,6 +20,7 @@ import ExamDetail from './pages/exam-detail';
 import ClassConfirm from './pages/confirm-class';
 import Chat from './pages/chat-manager/Chat'
 import TeacherFileManagement from './pages/teacher-file-management';
+import StudentFileView from './pages/student-file-view';
 
 const App = () => {
   return (
@@ -47,6 +48,7 @@ const App = () => {
           <Route path="/exam/:examId" element={<ExamDetail />} />
           <Route path="/confirm-class/:reservationId/:teacherId" element={<ClassConfirm />} />
           <Route path="/teacher-files" element={<TeacherFileManagement/>} />
+          <Route path="/student-files" element={<StudentFileView/>} />
         </Routes>
       </AuthProvider>
     </Router>
