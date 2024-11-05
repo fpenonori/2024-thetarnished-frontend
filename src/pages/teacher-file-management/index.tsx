@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import SideBar from '../../components/sidebar/sidebar';
 import StudentAccessPopup from './StudentAccessPopup';
 import FileUploadPopup from './UploadFilePopup';
-import { MainContainer, FixedTitleContainer, ScrollableCardsContainer, CardsContainer, Card, CardHeader, CardBody, DownloadButton, LoadingOverlay, DeleteButton, Container, ButtonContainer, UploadButton } from './components';
+import { MainContainer, FixedTitleContainer, ScrollableCardsContainer, CardsContainer, Card, CardHeader, CardBody, LoadingOverlay, Container, ButtonContainer } from './components';
 import { Message } from '../../components/message/components';
 import { useAuth } from '../../auth/useAuth';
+import { Button } from '../../components/main-button/components';
+
 
 interface Subject {
-    subject_id: string;
+    subjectid: string;
     subjectname: string;
 }
 
@@ -32,7 +34,7 @@ interface StudentWithAccess extends Student {
 const TeacherFileManagement = () => {
     const { user } = useAuth();
     const [files, setFiles] = useState<File[]>([]);
-    const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [subjects, setSubjects] = useState<{ subject_id: string; subjectname: string }[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [eligibleStudents, setEligibleStudents] = useState<Student[]>([]);
     const [grantedStudentIds, setGrantedStudentIds] = useState<Set<string>>(new Set());
@@ -55,7 +57,11 @@ const TeacherFileManagement = () => {
                 const subjectsData = await subjectsResponse.json();
 
                 if (filesResponse.ok) setFiles(filesData.files);
-                if (subjectsResponse.ok) setSubjects(subjectsData);
+                if (subjectsResponse.ok) setSubjects(subjectsData.map((subject: any) => ({
+                    subjectid: subject.subjectid,
+                    subjectname: subject.subjectname
+                })));
+                console.log(subjects);
             } catch (error) {
                 console.error("Error fetching files or subjects", error);
                 setErrorMessage('Error fetching data');
@@ -85,9 +91,18 @@ const TeacherFileManagement = () => {
                 a.click();
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
-            } else {
-                console.error("Failed to download file");
+            } else if (response.status === 404) {
+                setErrorMessage('File not found');
+                setTimeout(() => setErrorMessage(null), 2000);
+            } else if (response.status === 401) {
+                setErrorMessage('Unauthorized file access');
+                setTimeout(() => setErrorMessage(null), 2000);
             }
+            else if (response.status === 500) {
+                setErrorMessage('Internal server error');
+                setTimeout(() => setErrorMessage(null), 2000);
+            }
+
         } catch (error) {
             console.error("Download error:", error);
         }
@@ -104,8 +119,18 @@ const TeacherFileManagement = () => {
 
             if (response.ok) {
                 setFiles(files.filter(file => file.fileid !== fileId));
-            } else {
-                console.error("Failed to delete file");
+            }
+            else if (response.status === 404) {
+                setErrorMessage('File not found');
+                setTimeout(() => setErrorMessage(null), 2000);
+            }
+            else if (response.status === 401) {
+                setErrorMessage('Unauthorized file access');
+                setTimeout(() => setErrorMessage(null), 2000);
+            }
+            else if (response.status === 500) {
+                setErrorMessage("Internal server error");
+                setTimeout(() => setErrorMessage(null), 2000);
             }
         } catch (error) {
             console.error("Delete error:", error);
@@ -116,7 +141,6 @@ const TeacherFileManagement = () => {
 
     const openAccessPopup = async (file: File) => {
         setSelectedFile(file);
-        setIsLoading(true);
         setIsAccessPopupOpen(true);
 
         try {
@@ -135,8 +159,6 @@ const TeacherFileManagement = () => {
             setGrantedStudentIds(new Set(grantedData.students.map((s: any) => s.student_id)));
         } catch (error) {
             console.error("Error fetching students:", error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -173,75 +195,117 @@ const TeacherFileManagement = () => {
         }
     };
 
-    const handleUpload = async (file: File, customName: string, subjectId: string) => {
-        if (!file || !subjectId) {
-          console.error("File or subject is missing");
-          return;
-        }
-
-        console.log("File:", file);
-        console.log("Subject ID:", subjectId);
-        console.log("Custom Name:", customName);
-        console.log("User ID:", user?.id);
-        const formData = new FormData();
-        formData.append("file", file); // `file` should be a `Blob` or `File` object
-        formData.append("teacher_id", user?.id); // Assuming `user.id` is the teacher's ID
-        formData.append("subject_id", subjectId);
-      
+    const fetchFiles = async () => {
+        setIsLoading(true);
         try {
-          const response = await fetch(`${URL}file/upload-single`, {
-            method: "POST",
-            body: formData,
-          });
-      
-          const data = await response.json();
-          if (response.ok) {
-            console.log("File uploaded successfully:", data.file);
-            // Update the UI or state with the new file data
-          } else {
-            console.error("File upload failed:", data.message || data.error);
-          }
+            const response = await fetch(`${URL}file-access/teacher/${user?.id}`);
+            const data = await response.json();
+    
+            if (response.ok) {
+                setFiles(data.files);
+            } else {
+                setErrorMessage("Error fetching files");
+            }
         } catch (error) {
-          console.error("Error during file upload:", error);
+            console.error("Error fetching files:", error);
+            setErrorMessage("Error fetching files");
+        } finally {
+            setIsLoading(false);
         }
-      };
+    };
+
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+    const handleUpload = async (file: File, subjectId: string) => {
+        if (!file || !subjectId) {
+            console.error("File or subject is missing");
+            return;
+        }
+    
+        // Check file size before proceeding
+        if (file.size > MAX_FILE_SIZE) {
+            setErrorMessage("File size exceeds the 10MB limit.");
+            setTimeout(() => setErrorMessage(null), 1000);  
+            return;
+        }
+    
+        setIsLoading(true); 
+    
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("teacher_id", user?.id);
+        formData.append("subject_id", subjectId);
+    
+        try {
+            const response = await fetch(`${URL}file/upload-single`, {
+                method: "POST",
+                body: formData,
+            });
+    
+            if (response.ok) {
+                console.log("File uploaded successfully.");
+                await fetchFiles(); // Refetch files after successful upload
+                setErrorMessage(null); // Clear any previous error messages
+            } else {
+                const data = await response.json();
+                setErrorMessage(data.message || "File upload failed.");
+            }
+        } catch (error) {
+            console.error("Error during file upload:", error);
+            setErrorMessage("An unexpected error occurred during upload.");
+        } finally {
+            setIsLoading(false); // Set loading to false when upload completes
+        }
+    };
 
     return (
-        <MainContainer>
+        <MainContainer style={{ overflowX: 'hidden' }}>
             <SideBar />
-            <Container>
-                <FixedTitleContainer>
-                    <h1>Archivos del Profesor</h1>
-                    <UploadButton onClick={() => setIsUploadPopupOpen(true)}>Upload New File</UploadButton>
-                    {errorMessage && <Message error>{errorMessage}</Message>}
-                </FixedTitleContainer>
-                <ScrollableCardsContainer>
-                    <CardsContainer>
-                        {files.map(file => (
-                            <Card key={file.fileid}>
-                                <CardHeader>{file.filename}</CardHeader>
-                                <CardBody>
-                                    <p>Materia: {file.subject.subjectname}</p>
-                                    <p>Fecha de carga: {file.upload_date}</p>
-                                    <ButtonContainer>
-                                        <DownloadButton onClick={() => handleDownload(file.fileid, file.filename)}>
-                                            Descargar
-                                        </DownloadButton>
-                                        <DownloadButton onClick={() => openAccessPopup(file)}>
-                                            Manage Access
-                                        </DownloadButton>
-                                        <DeleteButton onClick={() => handleDelete(file.fileid)}>
-                                            Delete
-                                        </DeleteButton>
-                                    </ButtonContainer>
-                                </CardBody>
-                            </Card>
-                        ))}
-                    </CardsContainer>
-                </ScrollableCardsContainer>
+            <Container style={{ overflowX: 'hidden' }}>
+                {!isLoading && (
+                    <FixedTitleContainer>
+                        <h1>Teacher's Files</h1>
+                        <Button className="top-right-button" onClick={() => setIsUploadPopupOpen(true) }>Upload New File</Button>
+                        {errorMessage && <Message error>{errorMessage}</Message>}
+                    </FixedTitleContainer>
+                )}
+
+                {isLoading ? (
+                    <LoadingOverlay isVisible={isLoading}>Cargando...</LoadingOverlay>
+                ) : files.length === 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 150px)', color: '#FFFFFF' }}>
+                        <h2 style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>No files available</h2>
+                        <p style={{ fontSize: '1.5rem' }}>Upload a new file to start managing your files.</p>
+                    </div>
+                ) : (
+                    <ScrollableCardsContainer>
+                        <CardsContainer>
+                            {files.map(file => (
+                                <Card key={file.fileid}>
+                                    <CardHeader>{file.filename}</CardHeader>
+                                    <CardBody>
+                                        <p>Subject: {file.subject.subjectname}</p>
+                                        <p>Upload date: {file.upload_date}</p>
+                                        <ButtonContainer>
+                                            <Button onClick={() => handleDownload(file.fileid, file.filename)}>
+                                                Descargar
+                                            </Button>
+                                            <Button onClick={() => openAccessPopup(file)}>
+                                                Manage Access
+                                            </Button>
+                                            <Button important onClick={() => handleDelete(file.fileid)}>
+                                                Delete
+                                            </Button>
+                                        </ButtonContainer>
+                                    </CardBody>
+                                </Card>
+                            ))}
+                        </CardsContainer>
+                    </ScrollableCardsContainer>
+                )}
             </Container>
 
-            <FileUploadPopup 
+            <FileUploadPopup
                 isOpen={isUploadPopupOpen}
                 onClose={() => setIsUploadPopupOpen(false)}
                 onUpload={handleUpload}
@@ -257,11 +321,6 @@ const TeacherFileManagement = () => {
                     hasAccess: grantedStudentIds.has(student.student_id),
                 }))}
             />
-
-            {isLoading && <LoadingOverlay isVisible={isLoading}>Cargando...</LoadingOverlay>}
-            {errorMessage && <Message error>{errorMessage}</Message>}
         </MainContainer>
     );
-};
-
-export default TeacherFileManagement;
+};export default TeacherFileManagement;
