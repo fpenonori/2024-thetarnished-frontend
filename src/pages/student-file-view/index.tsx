@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import SideBar from '../../components/sidebar/sidebar';
-import { MainContainer, FixedTitleContainer, ScrollableCardsContainer, CardsContainer, Card, CardHeader, CardBody, DownloadButton, LoadingOverlay, Container, NoFilesMessage } from './components';
+import { MainContainer, FixedTitleContainer, ScrollableCardsContainer, CardsContainer, Card, CardHeader, CardBody, LoadingOverlay, Container, NoFilesMessage } from './components';
 import { Message } from '../../components/message/components';
 import { useAuth } from '../../auth/useAuth';
+import { Button } from '../../components/main-button/components';
 
 interface Subject {
     subjectname: string;
 }
 
 interface Teacher {
+    teacher_id: string;
     firstname: string;
     lastname: string;
 }
@@ -33,7 +35,13 @@ const StudentFileView = () => {
         const fetchFiles = async () => {
             try {
                 setIsLoading(true);
-                const response = await fetch(`${URL}file-access/student/${user?.id}`);
+                const response = await fetch(`${URL}file-access/student/${user?.id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${user?.token}`,
+                    },
+                });
                 const data = await response.json();
                 if (response.ok) {
                     setFiles(data.files);
@@ -46,6 +54,9 @@ const StudentFileView = () => {
             } catch (error) {
                 console.error("Error fetching files", error);
                 setErrorMessage('Error fetching files');
+                setInterval(() => {
+                    setErrorMessage(null);
+                }, 2000);
             } finally {
                 setIsLoading(false);
             }
@@ -54,12 +65,15 @@ const StudentFileView = () => {
         if (user?.id) fetchFiles();
     }, [URL, user?.id]);
 
-    const handleDownload = async (fileId: string, filename: string) => {
+    const handleDownload = async (fileId: string, filename: string, teacher_id: string) => {
         try {
             const response = await fetch(`${URL}file/${fileId}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ student_id: user?.id }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user?.token}`,
+                },
+                body: JSON.stringify({teacher_id: teacher_id }),
             });
 
             if (response.ok) {
@@ -77,6 +91,10 @@ const StudentFileView = () => {
             }
         } catch (error) {
             console.error("Download error:", error);
+            setErrorMessage('Error downloading file');
+            setInterval(() => {
+                setErrorMessage(null);
+            }, 2000);
         }
     };
 
@@ -105,11 +123,10 @@ const StudentFileView = () => {
                                         <CardHeader>{file.filename}</CardHeader>
                                         <CardBody>
                                             <p>Materia: {file.subject.subjectname}</p>
-                                            <p>Fecha de carga: {file.upload_date}</p>
                                             <p>Profesor: {file.teacher.firstname} {file.teacher.lastname}</p>
-                                            <DownloadButton onClick={() => handleDownload(file.fileid, file.filename)}>
+                                            <Button onClick={() => handleDownload(file.fileid, file.filename, file.teacher.teacher_id)}>
                                                 Descargar
-                                            </DownloadButton>
+                                            </Button>
                                         </CardBody>
                                     </Card>
                                 ))}

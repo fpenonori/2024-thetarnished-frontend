@@ -49,8 +49,20 @@ const TeacherFileManagement = () => {
             try {
                 setIsLoading(true);
                 const [filesResponse, subjectsResponse] = await Promise.all([
-                    fetch(`${URL}file-access/teacher/${user?.id}`),
-                    fetch(`${URL}teachers/subjects/${user?.id}`)
+                    fetch(`${URL}file-access/teacher/${user?.id}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${user?.token}`
+                        }
+                    }),
+                    fetch(`${URL}teachers/subjects/${user?.id}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${user?.token}`
+                        }
+                    })
                 ]);
 
                 const filesData = await filesResponse.json();
@@ -65,6 +77,7 @@ const TeacherFileManagement = () => {
             } catch (error) {
                 console.error("Error fetching files or subjects", error);
                 setErrorMessage('Error fetching data');
+                setTimeout(() => setErrorMessage(null), 2000);
             } finally {
                 setIsLoading(false);
             }
@@ -77,7 +90,7 @@ const TeacherFileManagement = () => {
         try {
             const response = await fetch(`${URL}file/${fileId}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user?.token}` },
                 body: JSON.stringify({ teacher_id: user?.id }),
             });
 
@@ -113,7 +126,10 @@ const TeacherFileManagement = () => {
             setIsLoading(true);
             const response = await fetch(`${URL}file/delete-single/${fileId}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user?.token}`
+                },
                 body: JSON.stringify({ teacher_id: user?.id }),
             });
 
@@ -144,7 +160,13 @@ const TeacherFileManagement = () => {
         setIsAccessPopupOpen(true);
 
         try {
-            const eligibleResponse = await fetch(`${URL}file-access/eligible-students/${file.fileid}`);
+            const eligibleResponse = await fetch(`${URL}file-access/eligible-students/${file.fileid}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user?.token}`
+                },
+            });
             const eligibleData = await eligibleResponse.json();
 
             setEligibleStudents(eligibleData.students.map((student: any) => ({
@@ -153,12 +175,20 @@ const TeacherFileManagement = () => {
                 email: student.email,
             })));
 
-            const grantedResponse = await fetch(`${URL}file-access/all-students-granted/${file.fileid}`);
+            const grantedResponse = await fetch(`${URL}file-access/all-students-granted/${file.fileid}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user?.token}`
+                },
+            });
             const grantedData = await grantedResponse.json();
 
             setGrantedStudentIds(new Set(grantedData.students.map((s: any) => s.student_id)));
         } catch (error) {
             console.error("Error fetching students:", error);
+            setErrorMessage('Error fetching students');
+            setTimeout(() => setErrorMessage(null), 2000);
         }
     };
 
@@ -176,19 +206,27 @@ const TeacherFileManagement = () => {
             if (studentsToGrant.length > 0) {
                 await fetch(`${URL}file-access/grant/${selectedFile?.fileid}`, {
                     method: "POST",
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${user?.token}`
+                    },
                     body: JSON.stringify({ student_ids: studentsToGrant, teacher_id: user?.id }),
                 });
             }
             if (studentsToRevoke.length > 0) {
                 await fetch(`${URL}file-access/revoke/${selectedFile?.fileid}`, {
                     method: "DELETE",
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${user?.token}`
+                    },
                     body: JSON.stringify({ student_ids: studentsToRevoke, teacher_id: user?.id }),
                 });
             }
         } catch (error) {
             console.error("Error updating student access:", error);
+            setErrorMessage("Error updating student access");
+            setTimeout(() => setErrorMessage(null), 2000);
         } finally {
             setIsLoading(false);
             setIsAccessPopupOpen(false);
@@ -198,17 +236,24 @@ const TeacherFileManagement = () => {
     const fetchFiles = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${URL}file-access/teacher/${user?.id}`);
+            const response = await fetch(`${URL}file-access/teacher/${user?.id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user?.token}`
+                },
+            });
             const data = await response.json();
-    
+
             if (response.ok) {
                 setFiles(data.files);
             } else {
                 setErrorMessage("Error fetching files");
+                setTimeout(() => setErrorMessage(null), 2000);
             }
         } catch (error) {
-            console.error("Error fetching files:", error);
             setErrorMessage("Error fetching files");
+            setTimeout(() => setErrorMessage(null), 2000);
         } finally {
             setIsLoading(false);
         }
@@ -218,46 +263,60 @@ const TeacherFileManagement = () => {
 
     const handleUpload = async (file: File, subjectId: string) => {
         if (!file || !subjectId) {
-            console.error("File or subject is missing");
+            setErrorMessage("File or subject is missing");
+            setTimeout(() => setErrorMessage(null), 2000);
             return;
         }
-    
+
         // Check file size before proceeding
         //@ts-ignore
         if (file.size > MAX_FILE_SIZE) {
             setErrorMessage("File size exceeds the 10MB limit.");
-            setTimeout(() => setErrorMessage(null), 1000);  
+            setTimeout(() => setErrorMessage(null), 1000);
             return;
         }
-    
-        setIsLoading(true); 
-    
+
+        setIsLoading(true);
+
         const formData = new FormData();
         //@ts-ignore
         formData.append("file", file);
         //@ts-ignore
         formData.append("teacher_id", user?.id);
         formData.append("subject_id", subjectId);
-    
+
         try {
             const response = await fetch(`${URL}file/upload-single`, {
                 method: "POST",
+                headers: {
+                    'Authorization': `Bearer ${user?.token}`
+                },
                 body: formData,
             });
-    
+
             if (response.ok) {
-                console.log("File uploaded successfully.");
-                await fetchFiles(); // Refetch files after successful upload
-                setErrorMessage(null); // Clear any previous error messages
-            } else {
+                await fetchFiles();
+            }
+            else if (response.status === 400) {
+                const data = await response.json();
+                setErrorMessage(data.error || "File upload failed.");
+                setTimeout(() => setErrorMessage(null), 2000);
+            }
+            else if (response.status === 409) {
+                setErrorMessage("Invalid filename format");
+                setTimeout(() => setErrorMessage(null), 2000);
+            }
+            else {
                 const data = await response.json();
                 setErrorMessage(data.message || "File upload failed.");
+                setTimeout(() => setErrorMessage(null), 2000);
             }
         } catch (error) {
             console.error("Error during file upload:", error);
-            setErrorMessage("An unexpected error occurred during upload.");
+            setErrorMessage("An unexpected error occurred during upload");
+            setTimeout(() => setErrorMessage(null), 2000);
         } finally {
-            setIsLoading(false); // Set loading to false when upload completes
+            setIsLoading(false);
         }
     };
 
@@ -268,7 +327,7 @@ const TeacherFileManagement = () => {
                 {!isLoading && (
                     <FixedTitleContainer>
                         <h1>Teacher's Files</h1>
-                        <Button className="upload-button" onClick={() => setIsUploadPopupOpen(true) }>Upload New File</Button>
+                        <Button className="upload-button" onClick={() => setIsUploadPopupOpen(true)}>Upload New File</Button>
                         {errorMessage && <Message error>{errorMessage}</Message>}
                     </FixedTitleContainer>
                 )}
@@ -328,4 +387,4 @@ const TeacherFileManagement = () => {
             />
         </MainContainer>
     );
-};export default TeacherFileManagement;
+}; export default TeacherFileManagement;

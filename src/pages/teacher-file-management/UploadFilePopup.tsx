@@ -44,6 +44,15 @@ const UploadFilePopup: React.FC<UploadFilePopupProps> = ({ isOpen, onClose, onUp
         <ModalOverlay>
             <ModalContent>
                 <Title>Upload a New File</Title>
+                <Disclaimer>
+                    Please ensure your file meets the following requirements:
+                    <ul>
+                        <li>File name can only contain alphanumeric characters, underscores, hyphens, and parentheses.</li>
+                        <li>File name must not contain more than one dot (`.`), reserved for the file extension.</li>
+                        <li>Allowed file extensions: .pdf, .docx, .jpg, .jpeg, .png</li>
+                        <li>Maximum file size: 10 MB.</li>
+                    </ul>
+                </Disclaimer>
                 <DropZone {...getRootProps()}>
                     <input {...getInputProps()} />
                     {selectedFile ? (
@@ -71,7 +80,7 @@ const UploadFilePopup: React.FC<UploadFilePopupProps> = ({ isOpen, onClose, onUp
                         </option>
                     ))}
                 </Select>
-
+    
                 <Button disabled={!selectedFile || !subjectId || isUploading} onClick={handleUploadClick}>
                     {isUploading ? 'Uploading...' : 'Upload'}
                 </Button>
@@ -79,6 +88,46 @@ const UploadFilePopup: React.FC<UploadFilePopupProps> = ({ isOpen, onClose, onUp
             </ModalContent>
         </ModalOverlay>
     );
+    
+    // return (
+    //     <ModalOverlay>
+    //         <ModalContent>
+    //             <Title>Upload a New File</Title>
+    //             <DropZone {...getRootProps()}>
+    //                 <input {...getInputProps()} />
+    //                 {selectedFile ? (
+    //                     <FilePreview>Selected file: {selectedFile.name}</FilePreview>
+    //                 ) : (
+    //                     <FilePreview>Drag 'n' drop a file here, or click to select one</FilePreview>
+    //                 )}
+    //             </DropZone>
+    //             <Select
+    //                 value={subjectId}
+    //                 onChange={(e) => {
+    //                     const selectedSubject = subjects.find(
+    //                         (subject) => subject.subjectid === e.target.value
+    //                     );
+    //                     if (selectedSubject) {
+    //                         setSubjectId(selectedSubject.subjectid);
+    //                         console.log("Selected subject ID:", selectedSubject.subjectid);
+    //                     }
+    //                 }}
+    //             >
+    //                 <option value="">Select subject</option>
+    //                 {subjects.map((subject) => (
+    //                     <option key={subject.subjectid} value={subject.subjectid}>
+    //                         {subject.subjectname}
+    //                     </option>
+    //                 ))}
+    //             </Select>
+
+    //             <Button disabled={!selectedFile || !subjectId || isUploading} onClick={handleUploadClick}>
+    //                 {isUploading ? 'Uploading...' : 'Upload'}
+    //             </Button>
+    //             <Button important onClick={onClose}>Cancel</Button>
+    //         </ModalContent>
+    //     </ModalOverlay>
+    // );
 };
 
 export default UploadFilePopup;
@@ -133,5 +182,21 @@ const Select = styled.select`
     border: 1px solid #ccc;
     border-radius: 4px;
     width: 100%;
+`;
+
+const Disclaimer = styled.div`
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 15px;
+    line-height: 1.4;
+
+    ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    li {
+        margin-bottom: 5px;
+    }
 `;
 
