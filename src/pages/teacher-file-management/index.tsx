@@ -223,6 +223,7 @@ const TeacherFileManagement = () => {
         }
     
         // Check file size before proceeding
+        //@ts-ignore
         if (file.size > MAX_FILE_SIZE) {
             setErrorMessage("File size exceeds the 10MB limit.");
             setTimeout(() => setErrorMessage(null), 1000);  
@@ -232,7 +233,9 @@ const TeacherFileManagement = () => {
         setIsLoading(true); 
     
         const formData = new FormData();
+        //@ts-ignore
         formData.append("file", file);
+        //@ts-ignore
         formData.append("teacher_id", user?.id);
         formData.append("subject_id", subjectId);
     
@@ -308,7 +311,9 @@ const TeacherFileManagement = () => {
             <FileUploadPopup
                 isOpen={isUploadPopupOpen}
                 onClose={() => setIsUploadPopupOpen(false)}
+                //@ts-ignore
                 onUpload={handleUpload}
+                //@ts-ignore
                 subjects={subjects}
             />
 

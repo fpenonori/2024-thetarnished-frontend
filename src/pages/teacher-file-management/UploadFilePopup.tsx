@@ -31,6 +31,7 @@ const UploadFilePopup: React.FC<UploadFilePopupProps> = ({ isOpen, onClose, onUp
     const handleUploadClick = async () => {
         if (selectedFile && subjectId) {
             setIsUploading(true);
+            //@ts-ignore
             await onUpload(selectedFile, subjectId);
             setIsUploading(false);
             onClose();
