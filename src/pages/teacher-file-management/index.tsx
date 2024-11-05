@@ -268,7 +268,7 @@ const TeacherFileManagement = () => {
                 {!isLoading && (
                     <FixedTitleContainer>
                         <h1>Teacher's Files</h1>
-                        <Button className="top-right-button" onClick={() => setIsUploadPopupOpen(true) }>Upload New File</Button>
+                        <Button className="upload-button" onClick={() => setIsUploadPopupOpen(true) }>Upload New File</Button>
                         {errorMessage && <Message error>{errorMessage}</Message>}
                     </FixedTitleContainer>
                 )}

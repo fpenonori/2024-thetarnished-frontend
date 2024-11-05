@@ -130,17 +130,20 @@ export const LoadingOverlay = styled.div<{ isVisible: boolean }>`
 
 
 export const FixedTitleContainer = styled.div`
-    width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     padding: 20px;
-    text-align: center;
-    position: relative;
-
+    width: 100%;
+    
     h1 {
-        font-size: 1.8rem;
-        margin: 0;
+        margin: 0 auto; /* Centers the title */
+    }
+
+    .upload-button {
+        position: absolute;
+        right: 20px;
+        /* additional button styling */
     }
 `;
 
