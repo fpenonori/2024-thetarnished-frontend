@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavbarContainer, NavbarLink, LogOutNavbarLink } from './components';
-import { AiOutlineHome , AiOutlineForm , AiOutlineUser/* , AiOutlineTool */, AiOutlineSchedule, AiOutlineLogout/* , AiOutlineDatabase */, AiOutlineGroup } from "react-icons/ai";
+import { AiOutlineHome , AiOutlineForm , AiOutlineUser/* , AiOutlineTool */, AiOutlineSchedule, AiOutlineLogout/* , AiOutlineDatabase */, AiOutlineGroup, AiOutlineFile } from "react-icons/ai";
 import { PiExamLight } from "react-icons/pi";
 import { useAuth } from '../../auth/useAuth';
 
@@ -18,6 +18,7 @@ const SideBar: React.FC = () => {
                 <>
                 <NavbarLink title='Manage schedule' to="/manage-schedule" className={({ isActive }) => (isActive ? "active" : "")}><AiOutlineSchedule /></NavbarLink>
                 <NavbarLink title='Manage classes' to="/manage-classes" className={({ isActive }) => (isActive ? "active" : "")}><AiOutlineForm  /></NavbarLink>
+                <NavbarLink title='Manage files' to="/teacher-files" className={({ isActive }) => (isActive ? "active" : "")}><AiOutlineFile  /></NavbarLink>
                 </>
                 )}
 
@@ -31,6 +32,7 @@ const SideBar: React.FC = () => {
                 <NavbarLink title='My classes' to="/my-classes" className={({ isActive }) => (isActive ? "active" : "")}><AiOutlineGroup  /></NavbarLink>
                 <NavbarLink title='My exams' to="/exam-viewer" className={({ isActive }) => (isActive ? "active" : "")}><PiExamLight  /></NavbarLink>
                 <NavbarLink title='My profile' to="/profile" className={({ isActive }) => (isActive ? "active" : "")}><AiOutlineUser /></NavbarLink>
+                <NavbarLink title='Manage files' to="/student-files" className={({ isActive }) => (isActive ? "active" : "")}><AiOutlineFile  /></NavbarLink>
                 </>
             )}
             
