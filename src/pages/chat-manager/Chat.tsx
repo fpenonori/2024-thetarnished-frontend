@@ -38,6 +38,7 @@ const Chat: React.FC = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const {studentId, teacherId} = useParams();
   const {user} = useAuth();
+  //@ts-ignore
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const URL = import.meta.env.VITE_API_URL;
 
@@ -55,7 +56,9 @@ const Chat: React.FC = () => {
     if (user?.role) {
       setRole(user.role);
     }
+    //@ts-ignore
     fetchStudentName(studentId);
+    //@ts-ignore
     fetchTeacherName(teacherId);
     scrollToBottom();
   }, [user, messages]);
