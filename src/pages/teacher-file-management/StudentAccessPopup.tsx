@@ -87,7 +87,11 @@ const TextField = styled.input`
     }
 `;
 
-const FilterComponent = ({ filterText, onFilter, onClear }) => (
+const FilterComponent: React.FC<{
+    filterText: string;
+    onFilter: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onClear: () => void;
+}> = ({ filterText, onFilter, onClear }) => (
     <>
         <TextField
             id="search"
@@ -97,7 +101,7 @@ const FilterComponent = ({ filterText, onFilter, onClear }) => (
             value={filterText}
             onChange={onFilter}
         />
-        <Button secondary onClick={onClear} style={{height: '32 px'}}>
+        <Button secondary onClick={onClear} style={{height: '32px'}}>
             X
         </Button>
     </>
