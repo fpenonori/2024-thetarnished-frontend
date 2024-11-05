@@ -112,7 +112,7 @@ const StudentFileView = () => {
                 ) : (
                     <>
                         <FixedTitleContainer>
-                            <h1>Archivos Disponibles</h1>
+                            <h1>Student's Files</h1>
                             {errorMessage && <Message error>{errorMessage}</Message>}
                         </FixedTitleContainer>
 

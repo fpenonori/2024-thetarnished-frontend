@@ -139,7 +139,7 @@ export const FixedTitleContainer = styled.div`
         position: relative;
 
         h1 {
-            font-size: 1.8rem;
+            font-size: 3.5rem;
             margin: 0;
         }
     `;
