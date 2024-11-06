@@ -333,7 +333,7 @@ const TeacherFileManagement = () => {
                 )}
 
                 {isLoading ? (
-                    <LoadingOverlay isVisible={isLoading}>Cargando...</LoadingOverlay>
+                    <LoadingOverlay isVisible={isLoading}>Loading...</LoadingOverlay>
                 ) : files.length === 0 ? (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 150px)', color: '#FFFFFF' }}>
                         <h2 style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>No files available</h2>

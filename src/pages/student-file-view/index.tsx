@@ -103,7 +103,7 @@ const StudentFileView = () => {
             <SideBar />
             <Container>
                 {isLoading ? (
-                    <LoadingOverlay isVisible={isLoading}>Cargando...</LoadingOverlay>
+                    <LoadingOverlay isVisible={isLoading}>Loading...</LoadingOverlay>
                 ) : files.length === 0 ? (
                     <NoFilesMessage>
                         <h2>Hello, {user?.firstName}!</h2>
@@ -136,7 +136,7 @@ const StudentFileView = () => {
                 )}
             </Container>
 
-            {isLoading && <LoadingOverlay isVisible={isLoading}>Cargando...</LoadingOverlay>}
+            {/* {isLoading && <LoadingOverlay isVisible={isLoading}>Loading...</LoadingOverlay>} */}
         </MainContainer>
     );
 };
