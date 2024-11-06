@@ -154,7 +154,7 @@ export const ClearButton = styled(Button)`
     background-color: #D9534F;
     color: white;
     width: 32px;
-    height: 32px;
+    height: 40px;
     border-radius: 4px;
 
     &:hover {
