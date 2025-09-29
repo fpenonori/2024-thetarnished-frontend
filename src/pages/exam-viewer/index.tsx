@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import { Content, ExamCard, ExamInfo, ExamTitle, MainContainer } from './components';
 import SideBar from '../../components/sidebar/sidebar';
 import Logo from '../../components/top-down-logo';
@@ -38,20 +38,31 @@ const ExamViewer = () => {
   const handleExamClick = (examId: string) => {
     navigate(`/exam/${examId}`);
   };
-  
+
   useEffect(() => {
+    if (!user?.id) {
+      setExams([]);
+      return;
+    }
+
     const getAllExamsByStudentId = async () => {
       try {
-        const response = await fetch(`${URL}exam/get-student-exams-by/${user?.id}`);
+        const response = await fetch(`${URL}exam/get-student-exams-by/${user.id}`);
+        if (!response.ok) {
+          setExams([]);
+          return;
+        }
         const data = await response.json();
-        setExams(data);
+        setExams(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Error fetching exams:', error);
+        setExams([]);
       }
     };
+
     getAllExamsByStudentId();
-  }, [URL, user?.id])
-  
+  }, [URL, user?.id]);
+
   return (
     <MainContainer>
         <SideBar/>
