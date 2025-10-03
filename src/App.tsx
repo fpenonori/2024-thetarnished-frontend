@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthProvider';
+import { ProtectedRoute } from './auth/ProtectedRoute';
 import Login from '../src/pages/login'
 import TeacherHome from './pages/teacher-home'
 import StudentHome from './pages/student-home'
@@ -29,26 +30,139 @@ const App = () => {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/teacher-home" element={<TeacherHome />} />
-          <Route path="/student-home" element={<StudentHome />} />
-          <Route path="/manage-schedule" element={<ManageSchedule />} />
-          <Route path="/manage-classes" element={<ManageClasses />} />
-          <Route path="/my-classes" element={<MyClasses />} />
-          <Route path="/exam-viewer" element={<ExamViewer />} />
-          <Route path="/class-browser/:subjectId/:subjectName" element={<ClassBrowser />} />
-          <Route path="/chat/:studentId/:teacherId/" element={<Chat />} />  {/* No nos olvidemos de agregar esto     :studentId/:teacherId*/ }
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/reset-password/:userId/:token" element={<ResetPassword />} />
-          <Route path="/admin-home" element={<AdminHome />} />
-          <Route path="/my-exams" element={<ExamViewer />} />
-          <Route path="/exam/:examId" element={<ExamDetail />} />
           <Route path="/confirm-class/:reservationId/:teacherId" element={<ClassConfirm />} />
-          <Route path="/teacher-files" element={<TeacherFileManagement/>} />
-          <Route path="/student-files" element={<StudentFileView/>} />
+
+          <Route
+            path="/teacher-home"
+            element={
+              <ProtectedRoute>
+                <TeacherHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student-home"
+            element={
+              <ProtectedRoute>
+                <StudentHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-schedule"
+            element={
+              <ProtectedRoute>
+                <ManageSchedule />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-classes"
+            element={
+              <ProtectedRoute>
+                <ManageClasses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-classes"
+            element={
+              <ProtectedRoute>
+                <MyClasses />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exam-viewer"
+            element={
+              <ProtectedRoute>
+                <ExamViewer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/class-browser/:subjectId/:subjectName"
+            element={
+              <ProtectedRoute>
+                <ClassBrowser />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chat/:studentId/:teacherId/"
+            element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-home"
+            element={
+              <ProtectedRoute>
+                <AdminHome />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-exams"
+            element={
+              <ProtectedRoute>
+                <ExamViewer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exam/:examId"
+            element={
+              <ProtectedRoute>
+                <ExamDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teacher-files"
+            element={
+              <ProtectedRoute>
+                <TeacherFileManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student-files"
+            element={
+              <ProtectedRoute>
+                <StudentFileView />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </AuthProvider>
     </Router>
