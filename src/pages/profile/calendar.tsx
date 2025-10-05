@@ -20,7 +20,7 @@ export default function DateRangeCalendarComponent({ onDateChange }: DateRangeCa
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DemoContainer components={['DateRangeCalendar', 'DateRangeCalendar']}>
-        <DateRangeCalendar calendars={2} value={value} onChange={handleChange} />
+        <DateRangeCalendar disablePast={true} calendars={2} value={value} onChange={handleChange} />
       </DemoContainer>
     </LocalizationProvider>
   );
