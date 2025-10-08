@@ -126,7 +126,16 @@ const Chat: React.FC = () => {
       auth: { token: user.token },
     });
 
-    socket.emit("joinRoom", { studentId, teacherId });
+    socket.emit("joinRoom", { studentId, teacherId }, (response?: { error?: string }) => {
+      if (response?.error) {
+        setErrorMessage(response.error);
+        setShowErrorMessage(true);
+        setTimeout(() => {
+          setShowErrorMessage(false);
+          navigate("/");
+        }, 2000);
+      }
+    });
 
     socket.on("messageHistory", (history: Message[]) => {
       const filteredHistory = history.filter(
@@ -145,12 +154,6 @@ const Chat: React.FC = () => {
 
     socket.on("error", (err) => {
       console.error("Socket error", err);
-      setErrorMessage(err.message);
-      setShowErrorMessage(true);
-      setTimeout(() => {
-        setShowErrorMessage(false);
-        navigate("/");
-      }, 2000);
     });
 
     socketRef.current = socket;
@@ -162,7 +165,7 @@ const Chat: React.FC = () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [studentId, teacherId, user?.token, scrollToBottom]);
+  }, [studentId, teacherId, user?.token, scrollToBottom, navigate]);
 
   useEffect(() => {
     scrollToBottom();
