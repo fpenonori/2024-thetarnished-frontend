@@ -12,6 +12,7 @@ import { AnimatedLoadingLogo } from "../../components/animated-loading-logo/comp
 import SimplifiedLogo from "../../assets/Logo transparent.png";
 import colors from "../../assets/colors";
 import { RiCloseLargeFill } from "react-icons/ri";
+import { Message } from "../../components/message/components";
 
 const CHAT_URL = import.meta.env.VITE_CHAT_API_URL;
 
@@ -33,10 +34,15 @@ const Chat: React.FC = () => {
   const [teacherName, setTeacherName] = useState<string>("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
-  const { studentId, teacherId } = useParams<{ studentId?: string; teacherId?: string }>();
+  const { studentId, teacherId } = useParams<{
+    studentId?: string;
+    teacherId?: string;
+  }>();
   const { user } = useAuth();
   // @ts-ignore
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("Default error message");
   const URL = import.meta.env.VITE_API_URL;
 
   const navigate = useNavigate();
@@ -139,6 +145,12 @@ const Chat: React.FC = () => {
 
     socket.on("error", (err) => {
       console.error("Socket error", err);
+      setErrorMessage(err.message);
+      setShowErrorMessage(true);
+      setTimeout(() => {
+        setShowErrorMessage(false);
+        navigate("/");
+      }, 2000);
     });
 
     socketRef.current = socket;
@@ -192,6 +204,11 @@ const Chat: React.FC = () => {
 
   return (
     <MainContainer>
+      {showErrorMessage && (
+        <Message error>
+          Could not update your password. Invalid credentials
+        </Message>
+      )}
       <Topbar />
       <SideBar />
       {isLoading ? (
@@ -229,20 +246,29 @@ const Chat: React.FC = () => {
 
                   dateSeparator = (
                     <div key={`server-msg-${index}`} className="server-message">
-                      <p className="server-message-text">{serverMessage.message}</p>
+                      <p className="server-message-text">
+                        {serverMessage.message}
+                      </p>
                     </div>
                   );
                 }
 
                 const time = new Date(msg.timestamp);
-                const formattedTimestamp = `${String(time.getHours()).padStart(2, "0")}:${String(
-                  time.getMinutes()
-                ).padStart(2, "0")}`;
+                const formattedTimestamp = `${String(time.getHours()).padStart(
+                  2,
+                  "0"
+                )}:${String(time.getMinutes()).padStart(2, "0")}`;
 
                 return (
                   <React.Fragment key={index}>
                     {dateSeparator}
-                    <p className={isSenderMessage(msg) ? "sender-message" : "other-message"}>
+                    <p
+                      className={
+                        isSenderMessage(msg)
+                          ? "sender-message"
+                          : "other-message"
+                      }
+                    >
                       {msg.message}
                       <br />
                       <em
@@ -287,7 +313,11 @@ const MainContainer = styled.div`
   display: flex;
   align-items: center;
   background: rgb(43, 84, 52);
-  background: radial-gradient(circle, rgba(43, 84, 52, 1) 0%, rgba(15, 41, 46, 1) 92%);
+  background: radial-gradient(
+    circle,
+    rgba(43, 84, 52, 1) 0%,
+    rgba(15, 41, 46, 1) 92%
+  );
 `;
 
 const Content = styled.div`
@@ -320,4 +350,3 @@ const CloseButton = styled.button`
 `;
 
 export default Chat;
-
