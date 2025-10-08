@@ -206,7 +206,7 @@ const Chat: React.FC = () => {
     <MainContainer>
       {showErrorMessage && (
         <Message error>
-          Could not update your password. Invalid credentials
+          {errorMessage}
         </Message>
       )}
       <Topbar />
