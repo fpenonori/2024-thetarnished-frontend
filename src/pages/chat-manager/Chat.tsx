@@ -132,8 +132,13 @@ const Chat: React.FC = () => {
 
       redirectTimer = window.setTimeout(() => {
         setShowErrorMessage(false);
-        navigate("/");
-      }, 3000);
+        if (role === "STUDENT") {
+          navigate('/student-home')
+        }
+        if (role === "TEACHER") {
+          navigate('/teacher-home')
+        }
+      }, 2000);
     };
 
     const socket = io(CHAT_URL, {
@@ -142,11 +147,15 @@ const Chat: React.FC = () => {
       auth: { token: user.token },
     });
 
-    socket.emit("joinRoom", { studentId, teacherId }, (response?: { error?: string }) => {
-      if (response?.error) {
-        triggerUnauthorized(response.error);
+    socket.emit(
+      "joinRoom",
+      { studentId, teacherId },
+      (response?: { error?: string }) => {
+        if (response?.error) {
+          triggerUnauthorized(response.error);
+        }
       }
-    });
+    );
 
     socket.on("messageHistory", (history: Message[]) => {
       const filteredHistory = history.filter(
@@ -230,11 +239,7 @@ const Chat: React.FC = () => {
 
   return (
     <MainContainer>
-      {showErrorMessage && (
-        <Message error>
-          {errorMessage}
-        </Message>
-      )}
+      {showErrorMessage && <Message error>{errorMessage}</Message>}
       <Topbar />
       <SideBar />
       {isLoading ? (
