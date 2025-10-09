@@ -120,6 +120,22 @@ const Chat: React.FC = () => {
       return;
     }
 
+    let redirectTimer: number | undefined;
+
+    const triggerUnauthorized = (message: string) => {
+      setErrorMessage(message);
+      setShowErrorMessage(true);
+
+      if (redirectTimer) {
+        window.clearTimeout(redirectTimer);
+      }
+
+      redirectTimer = window.setTimeout(() => {
+        setShowErrorMessage(false);
+        navigate("/");
+      }, 3000);
+    };
+
     const socket = io(CHAT_URL, {
       transports: ["websocket"],
       secure: true,
@@ -128,12 +144,7 @@ const Chat: React.FC = () => {
 
     socket.emit("joinRoom", { studentId, teacherId }, (response?: { error?: string }) => {
       if (response?.error) {
-        setErrorMessage(response.error);
-        setShowErrorMessage(true);
-        setTimeout(() => {
-          setShowErrorMessage(false);
-          navigate("/");
-        }, 2000);
+        triggerUnauthorized(response.error);
       }
     });
 
@@ -152,7 +163,15 @@ const Chat: React.FC = () => {
       }
     });
 
-    socket.on("error", (err) => {
+    socket.on("error", (err: unknown) => {
+      const message =
+        typeof err === "string"
+          ? err
+          : typeof err === "object" && err !== null && "message" in err
+          ? String((err as { message?: string }).message)
+          : "You are not allowed to enter this room.";
+
+      triggerUnauthorized(message);
       console.error("Socket error", err);
     });
 
@@ -164,6 +183,10 @@ const Chat: React.FC = () => {
       socket.off("error");
       socket.disconnect();
       socketRef.current = null;
+
+      if (redirectTimer) {
+        window.clearTimeout(redirectTimer);
+      }
     };
   }, [studentId, teacherId, user?.token, scrollToBottom, navigate]);
 
