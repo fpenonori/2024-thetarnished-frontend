@@ -132,10 +132,10 @@ const Chat: React.FC = () => {
 
       redirectTimer = window.setTimeout(() => {
         setShowErrorMessage(false);
-        if (role === "STUDENT") {
+        if (user?.role === "STUDENT") {
           navigate('/student-home')
         }
-        if (role === "TEACHER") {
+        if (user?.role === "TEACHER") {
           navigate('/teacher-home')
         }
       }, 2000);
