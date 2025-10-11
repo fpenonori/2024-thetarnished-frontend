@@ -221,8 +221,16 @@ const ClassBrowser = () => {
     };
 
     const clearFilter = () => {
-      setFilter(INITIAL_FILTER_STATE);
-      applyFilter();
+
+      if(Array.isArray(subjects) && subjects.length > 0) {
+        const newFilterState = {...INITIAL_FILTER_STATE, subject: String(subjects[0].subjectid) };
+        setFilter(newFilterState);
+        applyFilter();
+      } else {
+        setFilter(INITIAL_FILTER_STATE);
+        applyFilter();
+
+      }
     }
 
 
@@ -286,6 +294,9 @@ const ClassBrowser = () => {
             const subjects = await subjectsResponse.json();
 
             setSubjects(subjects.results);
+            if(Array.isArray(subjects) && subjects.length > 0) {
+              setFilter(prev => ({...prev, subject: subjects[0].subjectid }))
+            };
             setLoadingFetchSubject(false)
           } catch(e) {
             console.log('getSubjects error', e);
@@ -770,7 +781,6 @@ const SubjectSelect = ({ value, onChange, subjects = [] }: SubjectSelectProps) =
                 color: '#3e7d44',
       }}
       >
-        <option value={''}>All Subjects</option>
         {subjects.map((subject: Subject) => (
           <option key={subject.subjectid} value={subject.subjectid}>
             {subject.subjectname}
