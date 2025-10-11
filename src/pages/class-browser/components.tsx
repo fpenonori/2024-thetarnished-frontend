@@ -127,51 +127,19 @@ export const Instructor = styled.p`
     color: ${colors.primary};
 `;
 
-export const Description = styled.p`
-    margin: 10px 0;
-`;
-
-export const Details = styled.p`
-    font-size: 0.9rem;
-    color: #555;
-`;
-
 export const ButtonsContainer = styled.div`
     display: flex;
-    flex-direction: row;
-    margin-top: auto;
-
-    @media (max-width: 850px){
-        position: relative;
-        margin-top: auto;
-    }
+    justify-content: center;
+    width: 100%;
 `
 
-export const LoadingSkeletonCard = styled.div`
+export const CardSkeleton = styled.div`
     width: 100%;
     height: 80px;
-    background-color: #e0e0e0;
+    background-color: rgba(163, 163, 163, 0.25);
     border-radius: 8px;
-    border: 1px solid ${colors.secondary} ;
     margin: 10px;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-    animation: pulse 1.5s infinite ease-in-out;
-    
-    @keyframes pulse {
-        0% {
-            background-color: transparent;
-            opacity: 0.1;
-        }
-        50% {
-            background-color: #adadad;
-            opacity: 0.2;
-        }
-        100% {
-            background-color: #939393;
-            opacity: 0.3;
-        }
-    }
-`;
+`
 
 export const StaticSkeletonCard = styled.div`
     width: 100%;
@@ -180,7 +148,7 @@ export const StaticSkeletonCard = styled.div`
     border-radius: 8px;
     margin: 10px;
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-`;
+`
 
 export const Select = styled.select`
     background-color: transparent ;
@@ -299,3 +267,34 @@ export const SlotButton = styled.button<SlotButtonProps>`
 export const SummaryContainer = styled.div``
 
 export const SummaryItem = styled.div``
+
+export const TimeInput = styled.input`
+    background: #ffffff;
+    border-radius: 5px;
+    font-size: 16px;
+    height: 36px;
+    border: 1px solid ${colors.primary};
+    color: #000;
+    padding: 0 8px;
+    -webkit-text-fill-color: #000;
+
+    &::-webkit-datetime-edit-fields-wrapper,
+    &::-webkit-datetime-edit-text,
+    &::-webkit-datetime-edit-hour-field,
+    &::-webkit-datetime-edit-minute-field,
+    &::-webkit-datetime-edit-ampm-field {
+        color: #000;
+    }
+
+    &::-webkit-calendar-picker-indicator {
+        filter: invert(0);
+    }
+
+    &::-moz-datetime-edit-fields-wrapper,
+    &::-moz-datetime-edit-text,
+    &::-moz-datetime-edit-hour-field,
+    &::-moz-datetime-edit-minute-field,
+    &::-moz-datetime-edit-ampm-field {
+        color: #000;
+    }
+`;

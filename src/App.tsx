@@ -3,7 +3,6 @@ import { AuthProvider } from './auth/AuthProvider';
 import { ProtectedRoute } from './auth/ProtectedRoute';
 import Login from '../src/pages/login'
 import TeacherHome from './pages/teacher-home'
-import StudentHome from './pages/student-home'
 import ManageSchedule from './pages/manage-schedule';
 import ManageClasses from './pages/manage-classes';
 import Profile from './pages/profile';
@@ -47,7 +46,7 @@ const App = () => {
             path="/student-home"
             element={
               <ProtectedRoute>
-                <StudentHome />
+                <ClassBrowser />
               </ProtectedRoute>
             }
           />
@@ -80,14 +79,6 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <ExamViewer />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/class-browser/:subjectId/:subjectName"
-            element={
-              <ProtectedRoute>
-                <ClassBrowser />
               </ProtectedRoute>
             }
           />
