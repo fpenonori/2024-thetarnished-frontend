@@ -80,17 +80,18 @@ const ClassBrowser = () => {
       timeRanges: { from: "08:00", to: "21:00" },
     }
     
-        const [filter, setFilter] = useState<FilterState>(INITIAL_FILTER_STATE);
+    const [filter, setFilter] = useState<FilterState>(INITIAL_FILTER_STATE);
 
 
-        const getPrevTeachersDictatingSubject = async () => {
+        const getPrevTeachersDictatingSubject = async (subjectOverride?: string) => {
           console.log('getPrevTeachers');
             if (user?.id) {
                 try {
 
                     const params = new URLSearchParams();
-                    if (filter.subject) {
-                      params.append("subjectid", filter.subject);
+                    const subjectForQuery = subjectOverride ?? filter.subject;
+                    if (subjectForQuery) {
+                      params.append("subjectid", subjectForQuery);
                     }
 
                     const queryString = params.toString();
@@ -136,22 +137,23 @@ const ClassBrowser = () => {
                 }
             }
         };
-    const applyFilter = async () => {
+    const applyFilter = async (nextFilter?: FilterState) => {
+      const effectiveFilter = nextFilter ?? filter;
 
       // parse filters to query params
       const params = new URLSearchParams();
 
-      if (filter.teacherName) {
-        params.append("name", filter.teacherName);
+      if (effectiveFilter.teacherName) {
+        params.append("name", effectiveFilter.teacherName);
       }
 
-      if (filter.subject) {
-        params.append("subjectid", filter.subject);
+      if (effectiveFilter.subject) {
+        params.append("subjectid", effectiveFilter.subject);
       }
 
-      if (filter.weekdays.length > 0) {
+      if (effectiveFilter.weekdays.length > 0) {
         // Convert weekday names to numbers (0 for Sunday, 1 for Monday, etc.)
-        const weekdayNumbers = filter.weekdays.map(day => {
+        const weekdayNumbers = effectiveFilter.weekdays.map(day => {
           switch(day) {
             case 'sun': return '7';
             case 'mon': return '1';
@@ -166,17 +168,18 @@ const ClassBrowser = () => {
         params.append("weekday", weekdayNumbers);
       }
 
-      if (filter.timeRanges) {
-        if (filter.timeRanges.from) {
-          params.append("from", filter.timeRanges.from);
+      if (effectiveFilter.timeRanges) {
+        if (effectiveFilter.timeRanges.from) {
+          params.append("from", effectiveFilter.timeRanges.from);
         }
-        if (filter.timeRanges.to) {
-          params.append("to", filter.timeRanges.to);
+        if (effectiveFilter.timeRanges.to) {
+          params.append("to", effectiveFilter.timeRanges.to);
         }
       }
 
-      if (filter.individual !== null) {
-      }  params.append("individual", filter.individual ? "true" : "false");
+      if (effectiveFilter.individual !== null) {
+        params.append("individual", effectiveFilter.individual ? "true" : "false");
+      }
 
       const queryString = params.toString();
 
@@ -207,7 +210,7 @@ const ClassBrowser = () => {
           );
           const filteredSchedules = schedules.filter(({ schedule }) => schedule.length > 0);
 
-          await getPrevTeachersDictatingSubject()
+          await getPrevTeachersDictatingSubject(effectiveFilter.subject)
           setTeachersDictatingSubject(filteredSchedules);
 
       setLoadingApplyFilter(false);
@@ -221,15 +224,13 @@ const ClassBrowser = () => {
     };
 
     const clearFilter = () => {
-
       if(Array.isArray(subjects) && subjects.length > 0) {
-        const newFilterState = {...INITIAL_FILTER_STATE, subject: String(subjects[0].subjectid) };
-        setFilter(newFilterState);
-        applyFilter();
+        const nextFilter = {...INITIAL_FILTER_STATE, subject: String(subjects[0].subjectid) };
+        setFilter(nextFilter);
+        void applyFilter(nextFilter);
       } else {
         setFilter(INITIAL_FILTER_STATE);
-        applyFilter();
-
+        void applyFilter(INITIAL_FILTER_STATE);
       }
     }
 
@@ -291,11 +292,14 @@ const ClassBrowser = () => {
               options,
             );
 
-            const subjects = await subjectsResponse.json();
+            const subjectsData = await subjectsResponse.json();
 
-            setSubjects(subjects.results);
-            if(Array.isArray(subjects) && subjects.length > 0) {
-              setFilter(prev => ({...prev, subject: subjects[0].subjectid }))
+            setSubjects(subjectsData.results);
+            if(Array.isArray(subjectsData.results) && subjectsData.results.length > 0) {
+              const firstSubject = subjectsData.results[0];
+              const nextFilter = {...INITIAL_FILTER_STATE, subject: String(firstSubject.subjectid) };
+              setFilter(nextFilter);
+              await applyFilter(nextFilter);
             };
             setLoadingFetchSubject(false)
           } catch(e) {
@@ -358,6 +362,12 @@ const ClassBrowser = () => {
             } else {
                 setIsBookingWithCashFlow(true);
             }
+
+            const subjectIdForReservation = clickedClass?.subjectid ?? filter.subject;
+            if (!subjectIdForReservation) {
+                setMessage('Subject not available for this teacher');
+                throw new Error('Subject not available for this teacher');
+            }
         
             for (const slot of selectedSlots) {
                 const selectedSchedule = teacherSchedule.find((schedule) => {
@@ -382,7 +392,7 @@ const ClassBrowser = () => {
 
                 const requestBody = {
                     student_id: user?.id,
-                    subject_id: subjectId,
+                    subject_id: Number(subjectIdForReservation),
                     teacher_id: clickedClass?.teacherid,
                     dayofweek: parseInt(slot.day.split(' ')[0], 10),
                     start_time: `${slot.time}:00`,
@@ -646,7 +656,7 @@ interface FilterComponentProps {
   filter: FilterState;
   setFilter: React.Dispatch<React.SetStateAction<FilterState>>;
   subjects: Subject[];
-  applyFilter: () => void;
+  applyFilter: (nextFilter?: FilterState) => Promise<void>;
   clearFilter: () => void;
 }
 
@@ -707,7 +717,7 @@ const Filter = ({ filter, setFilter, subjects, applyFilter, clearFilter }: Filte
           style={{
             backgroundColor: '#3e7d44',
           }}
-          onClick={applyFilter}>Apply Filters</button>
+          onClick={() => { void applyFilter(); }}>Apply Filters</button>
         </div>
     </div>
   )
@@ -810,6 +820,7 @@ const AvailableDays = ({ value, onChange }: AvailableDaysProps) => {
       <div style={{ display: "flex", gap: "8px" }}>
         {["sun", "mon", "tue", "wed", "thu", "fri", "sat"].map((day, idx) => {
           const isSelected = value.includes(day);
+          const displayLabel = day.charAt(0).toUpperCase() + day.slice(1);
           return (
             <div key={idx}>
               <input
@@ -831,7 +842,7 @@ const AvailableDays = ({ value, onChange }: AvailableDaysProps) => {
                   userSelect: "none",
                 }}
               >
-                {day}
+                {displayLabel}
               </label>
             </div>
           );
